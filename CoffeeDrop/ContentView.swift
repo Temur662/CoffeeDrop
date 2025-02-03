@@ -8,20 +8,37 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        TabView{
-            Home()
-                .tabItem{
-                    Label("Home", systemImage : "house")
-                }
-            MapTab()
-                .tabItem{
-                    Label("Map", systemImage: "map")
-                }
+    @State var isAuthenticated = false
+
+      var body: some View {
+        Group {
+          if isAuthenticated {
+            UserRootView()
+          } else {
+              AuthRootLayout()
+          }
         }
-    }
+        .task {
+            for await state in Constants.API.supabaseClient.auth.authStateChanges {
+            if [.initialSession, .signedIn, .signedOut].contains(state.event) {
+              isAuthenticated = state.session != nil
+            }
+          }
+        }
+      }
 }
 
 #Preview {
     ContentView()
 }
+
+/*TabView{
+    Home()
+        .tabItem{
+            Label("Home", systemImage : "house")
+        }
+    MapTab()
+        .tabItem{
+            Label("Map", systemImage: "map")
+        }
+}*/
