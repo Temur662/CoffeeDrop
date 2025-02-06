@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import Auth
 //  OTPModifer to go from one inputfield to the next
 struct OtpModifier: ViewModifier {
     
@@ -41,7 +42,7 @@ struct OTPVerificationView: View {
     enum FocusPin {
         case  pinOne, pinTwo, pinThree, pinFour, pinFive, pinSix
     }
-    
+    @EnvironmentObject var userProfile: UserProfile // UserProfile
     @FocusState private var pinFocusState : FocusPin?
     @State private var pinOne : String = ""
     @State private var pinTwo : String = ""
@@ -50,7 +51,10 @@ struct OTPVerificationView: View {
     @State private var pinFive : String = ""
     @State private var pinSix : String = ""
     @State private var result: Result<Void, Error>?
+    @State private var updateUserResult : Result<Void, Error>?
     @State var phoneNumber : String = ""
+    @State var password : String?
+    @State var email : String = ""
     @State private var showAlert : Bool = false
     private var isOTPValid : Bool {
         return pinOne.count == 1 && pinTwo.count == 1 && pinThree.count == 1 && pinFour.count == 1 && pinFive.count == 1 && pinSix.count == 1
@@ -236,9 +240,13 @@ struct OTPVerificationView: View {
                 try await Constants.API.supabaseClient.auth.verifyOTP(
                     phone: "+1"+phoneNumber,
                     token: OTPCode,
-                  type: .sms
+                    type: .sms
                 )
                 result = .success(())
+                if password != "" && password != nil{
+                    userProfile.newEmail = email;
+                    userProfile.newPassword = password!
+                }
             }
             catch{
                 result = .failure(error)

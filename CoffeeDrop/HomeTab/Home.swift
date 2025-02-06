@@ -6,89 +6,77 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct Home: View {
+    @EnvironmentObject var userProfile: UserProfile // UserProfile Object
+    @State var searchText: String = ""
+    @State var hasCancel: Bool = true
+    @State private var cameraPosition: MapCameraPosition = .region(MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 40.7534, longitude: 73.9768), span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)))
+
     var body: some View {
-        VStack{
-            ZStack(alignment: .top){
-                //  BackGround Linear Gradient
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(width: 430, height: 200)
-                    .background(
-                        LinearGradient(
-                            stops: [
-                                Gradient.Stop(color: Color(red: 0.54, green: 0.32, blue: 0.16), location: 0.00),
-                                Gradient.Stop(color: Color(red: 0.77, green: 0.66, blue: 0.58), location: 0.50),
-                                Gradient.Stop(color: .white, location: 1.00),
-                            ],
-                            startPoint: UnitPoint(x: 0.5, y: 0),
-                            endPoint: UnitPoint(x: 0.5, y: 1)
+        GeometryReader { geo in
+            VStack{
+             let width = geo.size.width
+                ZStack(alignment: .top){
+                    //  BackGround Linear Gradient
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 430, height: 200)
+                        .background(
+                            LinearGradient(
+                                stops: [
+                                    Gradient.Stop(color: Color(red: 0.83, green: 0.72, blue: 0.58), location: 0.00),
+                                    Gradient.Stop(color: .white, location: 1.00),
+                                ],
+                                startPoint: UnitPoint(x: 0.5, y: 0),
+                                endPoint: UnitPoint(x: 0.5, y: 1)
+                            )
                         )
-                    )
-                    .cornerRadius(15)
-                
-                //  Profile Name , Notification Bell and Points Counter displayed in a Horizontal Stack on top of Gradient
-                HStack{
-                    //  Profile Name
+                        .cornerRadius(15)
+                    
+                    //  Profile Name , Notification Bell and Points Counter displayed in a Horizontal Stack on top of Gradient
                     HStack{
-                        //  User Profile Pic
-                        Circle()
-                            .frame(width: 61, height: 61)
-                        //  Welcome & User Name
-                        VStack{
-                            Text("Welcome,")
-                                .font(
-                                    Font.custom("Poppins", size: 16)
-                                        .weight(.bold)
-                                )
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(.black)
-                            
-                            Text("Emily Williams ")
-                                .font(
-                                    Font.custom("Poppins", size: 14)
-                                        .weight(.light)
-                                )
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(.black)
+                        
+                        Button(
+                            action : {
+                                
+                            }
+                        ){
+                            Image(systemName: "envelope")
+                                .foregroundStyle(Color.black)
                         }
-                    }
-                    .padding(.leading)
-                    
-                    Spacer()
-                    
-                    //  Notification Bell
-                    ZStack{
-                        Circle()
-                            .foregroundColor(.white)
-                            .overlay(
-                                Image(.notificationBell)
-                                    .resizable()
-                                    .frame(width: 39, height: 39)
-                            )
-                            .frame(width: 51.8107, height: 51.81026, alignment: .center)
-                    }
-                    
-                    
-                    Spacer()
-                    
-                    // Points Counter
-                    ZStack{
-                        //  BackGround Card
-                        Rectangle()
-                            .foregroundColor(.clear)
-                            .frame(width: 70, height: 48)
-                            .background(.white)
                         
-                            .cornerRadius(5)
-                            .shadow(color: .white.opacity(0.5), radius: 2, x: 0, y: 0)
+                        Button(
+                            action : {
+                                
+                            }
+                        ){
+                            Image(systemName: "person.crop.circle")
+                                .foregroundStyle(Color.black)
+                        }
                         
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 5)
-                                    .inset(by: 0.5)
-                                    .stroke(Color(red: 0.54, green: 0.32, blue: 0.16).opacity(0.5), lineWidth: 1)
-                            )
+                        
+                        //  Profile Name
+                        HStack{
+                            //  Welcome & User Name
+                            HStack{
+                                Text("Hey,Welcome ")
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(.black)
+                                    .font(.subheadline)
+                                    .fontWeight(.bold)
+                                if let profile = userProfile.userProfile {
+                                    Text("\(profile.user_name ?? "")!")
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.black)
+                                        .font(.subheadline)
+                                        .fontWeight(.bold)
+                                }
+                            }
+                        }
+                        .padding([.leading,.trailing])
+                        
                         //  Points Display With CoffeeBean
                         VStack{
                             Spacer()
@@ -104,30 +92,77 @@ struct Home: View {
                             }
                             Spacer()
                         }
-                        .frame(width: 70, height: 48)
-                        
-                        // Points Label (Overlaying Bottom)
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.black)
-                            .frame(width: 50, height: 15)
-                            .overlay(
-                                Text("Points")
-                                    .font(.system(size: 8, weight: .medium))
-                                    .foregroundColor(.white)
-                            )
-                            .offset(y: 25) // Moves it down to overlay the box
+                        .frame(width: 70, height: 80)
                     }
-                    .frame(width: 70, height: 80)
-                    .padding(.trailing)
+                    .padding(.top, 55)
                 }
-                .padding(.top, 55)
-            }
-            .ignoresSafeArea()
-            //End of HomeView Top Bars
+                .ignoresSafeArea()
+                //End of HomeView Top Bars
+                
+                //  Cafe Searchbar
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .background(
+                            LinearGradient(
+                                stops: [
+                                    Gradient.Stop(color: Color(red: 0.97, green: 0.95, blue: 0.94), location: 0.41),
+                                    Gradient.Stop(color: Color(red: 0.56, green: 0.85, blue: 0.98), location: 1.00),
+                                ],
+                                startPoint: UnitPoint(x: 0, y: 0.5),
+                                endPoint: UnitPoint(x: 1, y: 0.5)
+                            )
+                        )
+                        .cornerRadius(20)
+                        .overlay(
+                            HStack{
+                                //  SearchBar
+                                    Rectangle()
+                                        .foregroundColor(.clear)
+                                        .frame(width: 270, height: 47)
+                                        .background(.white)
+                                        .cornerRadius(20)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 20)
+                                                .inset(by: 0.5)
+                                                .stroke(Color(red: 0.56, green: 0.85, blue: 0.98), lineWidth: 1)
+                                        )
+                                        .zIndex(1)
+                                //  Map
+                                Map(position: $cameraPosition)
+                                    .clipShape(.rect(
+                                        topLeadingRadius: 20,
+                                        bottomLeadingRadius: 0,
+                                        bottomTrailingRadius: 20,
+                                        topTrailingRadius: 20
+                                    ))
+                                    .frame(width: 100)
+                                    .offset(x: -25)
+                                    .mapStyle(.standard(elevation : .realistic))
 
-            
-            Spacer()
-            Spacer()
+                            }
+                        )
+                        .frame(width: width * 0.85, height: 49)
+                //  End of Cafe Searchbar
+                
+                //  CoffeeDrop Card
+                
+                Button(
+                    action: {
+                        SignOutUser()
+                    }
+                ) {
+                    Label("Logout", systemImage: "xmark")
+                }
+                
+                Spacer()
+            }
+        }
+    }
+    func SignOutUser() {
+        Task{
+            do{
+                try await Constants.API.supabaseClient.auth.signOut()
+            }
         }
     }
 }

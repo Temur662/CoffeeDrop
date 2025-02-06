@@ -32,15 +32,11 @@ struct AuthView: View {
                                         //  CoffeeDrop Text
                                         VStack{
                                             Text("COFFEE")
-                                                .font(
-                                                    Font.custom("Poppins", size: 36)
-                                                )
+                                                .font(.largeTitle)
                                                 .foregroundColor(Color(red: 0.54, green: 0.32, blue: 0.16))
                                                 .bold()
                                             Text("DROP")
-                                                .font(
-                                                    Font.custom("Poppins", size: 36)
-                                                )
+                                                .font(.largeTitle)
                                                 .foregroundColor(Color(red: 0.54, green: 0.32, blue: 0.16))
                                                 .bold()
                                         }
