@@ -85,6 +85,11 @@
             value = "https://pwarwxkarkccmrvzvftb.supabase.co"
             isEnabled = "YES">
          </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "GOOGLE_PLACES_KEY"
+            value = "AIzaSyBj3Rg2MGCpFAjK7itUzzchE7aJujXJLNY"
+            isEnabled = "YES">
+         </EnvironmentVariable>
       </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction

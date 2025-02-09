@@ -9,6 +9,7 @@ import SwiftUI
 import Auth
 import Combine
 import PostgREST
+import MapKit
 struct UserProfileData: Decodable {
     let user_id : UUID
     let email: String?
@@ -22,6 +23,7 @@ class UserProfile: ObservableObject {
     @State private var updateUserResult : Result<Void,Error>?
     @Published var newEmail : String = ""
     @Published var newPassword : String = ""
+    @Published var userLocation : MapCameraPosition?
     func SignOut() {
         Task{
             do{

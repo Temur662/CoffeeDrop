@@ -247,24 +247,3 @@ struct SignUpView : View {
             }
           }
 }
-
-//  Tasks :
-
-/*
-    * Sign In User with Phone OTP
-    * Save User Email and Password inputted so they could then login in with either phonenumber again or email / password
- 
-    - How do i do this with SupaBase
- 
-    What i know :
-        Supabase makes a user row when i call SignInWithPhoneOTP
-            - First Try Update Email and Password at this step ^
-            - Attempt Result : Session is missing
-            - Need to be logged into a session to update User Email and Password
-        I only get logged in when i verify my accout and get authenticated status
-        
-        Login and verify then update email and password
-        What i need: If User First time sign up run the UpdateEmail&Password()
-            - How do I Pass email and password to that function so it can be called on sign in.
-            - Second Try ^
- */

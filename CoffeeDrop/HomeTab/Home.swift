@@ -10,14 +10,14 @@ import MapKit
 
 struct Home: View {
     @EnvironmentObject var userProfile: UserProfile // UserProfile Object
-    @State var searchText: String = ""
-    @State var hasCancel: Bool = true
-    @State private var cameraPosition: MapCameraPosition = .region(MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 40.7534, longitude: 73.9768), span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)))
-
+    @StateObject private var locationManagerModel = ContentViewModel()
+    @State private var searchText: String = ""
+    @State private var hasCancel: Bool = true
     var body: some View {
         GeometryReader { geo in
-            VStack{
-             let width = geo.size.width
+            let width = geo.size.width
+            ScrollView(.vertical, showsIndicators: false){
+             VStack{
                 ZStack(alignment: .top){
                     //  BackGround Linear Gradient
                     Rectangle()
@@ -96,55 +96,85 @@ struct Home: View {
                     }
                     .padding(.top, 55)
                 }
-                .ignoresSafeArea()
                 //End of HomeView Top Bars
                 
                 //  Cafe Searchbar
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .background(
-                            LinearGradient(
-                                stops: [
-                                    Gradient.Stop(color: Color(red: 0.97, green: 0.95, blue: 0.94), location: 0.41),
-                                    Gradient.Stop(color: Color(red: 0.56, green: 0.85, blue: 0.98), location: 1.00),
-                                ],
-                                startPoint: UnitPoint(x: 0, y: 0.5),
-                                endPoint: UnitPoint(x: 1, y: 0.5)
-                            )
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .background(
+                        LinearGradient(
+                            stops: [
+                                Gradient.Stop(color: Color(red: 0.97, green: 0.95, blue: 0.94), location: 0.41),
+                                Gradient.Stop(color: Color(red: 0.56, green: 0.85, blue: 0.98), location: 1.00),
+                            ],
+                            startPoint: UnitPoint(x: 0, y: 0.5),
+                            endPoint: UnitPoint(x: 1, y: 0.5)
                         )
-                        .cornerRadius(20)
-                        .overlay(
-                            HStack{
-                                //  SearchBar
-                                    Rectangle()
-                                        .foregroundColor(.clear)
-                                        .frame(width: 270, height: 47)
-                                        .background(.white)
-                                        .cornerRadius(20)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 20)
-                                                .inset(by: 0.5)
-                                                .stroke(Color(red: 0.56, green: 0.85, blue: 0.98), lineWidth: 1)
-                                        )
-                                        .zIndex(1)
-                                //  Map
-                                Map(position: $cameraPosition)
-                                    .clipShape(.rect(
-                                        topLeadingRadius: 20,
-                                        bottomLeadingRadius: 0,
-                                        bottomTrailingRadius: 20,
-                                        topTrailingRadius: 20
-                                    ))
-                                    .frame(width: 100)
-                                    .offset(x: -25)
-                                    .mapStyle(.standard(elevation : .realistic))
-
+                    )
+                    .cornerRadius(20)
+                    .overlay(
+                        HStack{
+                            //  SearchBar
+                            Rectangle()
+                                .foregroundColor(.clear)
+                                .frame(width: 270, height: 47)
+                                .background(.white)
+                                .cornerRadius(20)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .inset(by: 0.5)
+                                        .stroke(Color(red: 0.56, green: 0.85, blue: 0.98), lineWidth: 1)
+                                )
+                                .zIndex(1)
+                            //  Map
+                            Map(position : $locationManagerModel.cameraPosition )
+                            {
+                                UserAnnotation()
                             }
-                        )
-                        .frame(width: width * 0.85, height: 49)
+                                .clipShape(.rect(
+                                    topLeadingRadius: 20,
+                                    bottomLeadingRadius: 0,
+                                    bottomTrailingRadius: 20,
+                                    topTrailingRadius: 20
+                                ))
+                                .frame(width: 100)
+                                .offset(x: -25)
+                                .mapStyle(.standard(elevation : .realistic))
+                                .onAppear {
+                                    locationManagerModel.checkIfLocationServicesEnabled()
+                                }
+                                .onChange(of: locationManagerModel.cameraPosition) { oldState, value in
+                                    userProfile.userLocation = value
+                                }
+                                
+                            
+                        }
+                    )
+                    .frame(width: width * 0.85, height: 49)
                 //  End of Cafe Searchbar
                 
                 //  CoffeeDrop Card
+                CoffeeDropCard()
+                    .frame(width: width * 0.9, height: 200, alignment: .center)
+                    .offset(x : -10)
+                //  End of CoffeDrop Card
+                
+                //  Cafes Near Me
+                HStack{
+                    Text("Cafés Near You ")
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.black)
+                        .font(.headline)
+                        .frame(alignment: .leading)
+                        .padding([.top, .leading])
+                    Spacer()
+                    Spacer()
+                }
+                 
+                 CafesNearMeView()
+                     .padding([.leading, .trailing])
+                
+                
                 
                 Button(
                     action: {
@@ -157,6 +187,10 @@ struct Home: View {
                 Spacer()
             }
         }
+            .ignoresSafeArea(edges : .top)
+            .scrollBounceBehavior(.basedOnSize)
+        }
+        .environmentObject(userProfile) // VERY IMPORTANT: Supply UserProfile to the Home view
     }
     func SignOutUser() {
         Task{
@@ -165,5 +199,42 @@ struct Home: View {
             }
         }
     }
+}
+
+final class ContentViewModel : NSObject, ObservableObject, CLLocationManagerDelegate {
+    @Published var cameraPosition: MapCameraPosition = .region(MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 40.752655, longitude: -73.977295), span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)))
+    
+    var locationManager : CLLocationManager?
+    
+    func checkIfLocationServicesEnabled() {
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager = CLLocationManager()
+            locationManager?.activityType = .automotiveNavigation
+            locationManager!.delegate = self
+        }
+        else{
+            print("Location Off")
+        }
+    }
+    
+    func checkLocationAuthorizationStatus() {
+        guard let locationManager = locationManager else { return }
+        
+        switch locationManager.authorizationStatus {
+            case .notDetermined:
+                locationManager.requestWhenInUseAuthorization( )
+        case .restricted, .denied:
+                print("Denied")
+        case .authorizedAlways, .authorizedWhenInUse:
+            cameraPosition = .region(MKCoordinateRegion(center: locationManager.location!.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)))
+        @unknown default:
+            break
+        }
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        checkLocationAuthorizationStatus()
+    }
+    
 }
 
