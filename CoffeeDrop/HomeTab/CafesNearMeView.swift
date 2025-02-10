@@ -62,9 +62,9 @@ struct CafesNearMeView : View {
                 }
             }
         }
-        .onChange(of: userProfile.userLocation ){ oldstate, newState in
-            GetCafesNearMe()
-        }
+        //.onChange(of: userProfile.userLocation ){ oldstate, newState in
+         //   GetCafesNearMe()
+        //}
     }
     
     func GetCafesNearMe(){

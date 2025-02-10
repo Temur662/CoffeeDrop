@@ -79,6 +79,7 @@ struct AuthView: View {
                                         let scrollViewWidth = geo.size.width //    Width of each card
                                         let minX = geo.frame(in: .global).minX //  Direction Card is being scrolled
                                         let progress = abs(minX / scrollViewWidth) //    Progress Tracker
+                                        //  Potential Crashs cause of this line ( Look into it )
                                         let currentCard = Int(progress)
                                         let nextCard = Int(progress + 1)
                                         
