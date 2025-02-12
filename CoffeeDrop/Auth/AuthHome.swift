@@ -15,6 +15,7 @@ struct AuthView: View {
     @State var NextIndicatorWidth : CGFloat = 0
     @State var InterpolatedOpacityValue : CGFloat = 1
     @State var NextInterpolatedOpacityValue : CGFloat = 0.2
+    
     var body : some View {
         GeometryReader{ geometry in
             VStack{

@@ -24,9 +24,7 @@ struct ContentView: View {
               isAuthenticated = state.session != nil
                 if isAuthenticated {
                    await userProfile.fetchProfile()
-                  
                 }
-                
             }
           }
         }

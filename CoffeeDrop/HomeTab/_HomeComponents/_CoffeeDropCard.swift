@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct CoffeeDropCard : View {
+    @Binding var GoToRewards : Bool
     var body : some View {
         GeometryReader{ geo in
-            let width = geo.size.width
             VStack(alignment : .center){
                 Image(.coffeeDropCard)
                     .resizable()
@@ -71,23 +71,26 @@ struct CoffeeDropCard : View {
                                 
                                 //  Rewards Button Link
                                 HStack{
-                                    Rectangle()
-                                        .foregroundColor(.clear)
-                                        .frame(width: 85, height: 30)
-                                        .background(Color(red: 0.62, green: 0.49, blue: 0.32))
-                                        .cornerRadius(30)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 30)
-                                                .inset(by: 0.5)
-                                                .stroke(.white, lineWidth: 1)
-                                                .overlay(
-                                                    Text("Rewards")
-                                                        .foregroundStyle(Color.white)
-                                                )
-                                        )
+                                    NavigationLink(destination: Rewards()){
+                                        Rectangle()
+                                            .foregroundColor(.clear)
+                                            .frame(width: 85, height: 30)
+                                            .background(Color(red: 0.62, green: 0.49, blue: 0.32))
+                                            .cornerRadius(30)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 30)
+                                                    .inset(by: 0.5)
+                                                    .stroke(.white, lineWidth: 1)
+                                                    .overlay(
+                                                        Text("Rewards")
+                                                            .foregroundStyle(Color.white)
+                                                    )
+                                            )
+                                    }
                                     Spacer()
                                     Spacer()
                                 }
+                                .padding(.top, 8)
 
                             }
                             .padding()

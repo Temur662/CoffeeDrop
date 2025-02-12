@@ -8,8 +8,14 @@
 import SwiftUI
 import MapKit
 struct MapTab: View {
+    var animation: Namespace.ID
     var body: some View {
-        Map()
+        NavigationStack{
+            Map()
+                .matchedGeometryEffect(id: "Map", in: animation)
+                .navigationBarHidden(true) // Hide the Navigation Bar
+        }
+        .edgesIgnoringSafeArea(.vertical)
     }
 }
 
