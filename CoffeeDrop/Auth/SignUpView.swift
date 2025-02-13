@@ -5,6 +5,8 @@
 //  Created by Temurbek Sayfutdinov on 2/2/25.
 //
 import SwiftUI
+import Auth
+import Combine
 struct SignUpView : View {
     @Environment(\.dismiss) private var dismiss
     @State var email = ""
@@ -16,9 +18,10 @@ struct SignUpView : View {
     @State var userName = ""
     @FocusState var isFieldFocus: FieldToFocus?
     @State var showAlert = false
-    @State var isActive = false
+    @State private var isActive : Bool  = false
+    @State private var updateUserResult : Result<Void,Error>?
     private var isFormFilledValid: Bool {
-        return !email.isEmpty && !password.isEmpty && !userName.isEmpty && !phoneNumber.isEmpty
+        return !email.isEmpty && !password.isEmpty && !userName.isEmpty && !phoneNumber.isEmpty && phoneNumber.count == 10
     }
     enum FieldToFocus {
         case secureField, textField
@@ -171,29 +174,28 @@ struct SignUpView : View {
                 HStack{
                     Spacer()
                     Spacer()
-                    NavigationLink(
-                        destination: OTPVerificationView(phoneNumber: phoneNumber),
-                        isActive: $isActive
-                    ){
-                        Button(action: {
-                            if isFormFilledValid {
-                                SignInWithPhoneOtp()
-                            }else{
-                                showAlert = true
-                            }
-                        }, label: {
-                            ZStack{
-                                Circle()
-                                    .frame(width: 64, height: 64)
-                                    .foregroundStyle(Color(red: 0.54, green: 0.32, blue: 0.16))
-                                Image(systemName: "arrow.right")
-                                    .font(Font.title.weight(.semibold))
-                                    .foregroundStyle(Color.white)
-                                    .frame(width: 40, height: 40)
-                            }
-                        })
-                        .padding(.trailing, 35)
-
+                    NavigationStack{
+                            Button(action: {
+                                if isFormFilledValid {
+                                    SignInWithPhoneOtp()
+                                }else{
+                                    showAlert = true
+                                }
+                            }, label: {
+                                ZStack{
+                                    Circle()
+                                        .frame(width: 64, height: 64)
+                                        .foregroundStyle(Color(red: 0.54, green: 0.32, blue: 0.16))
+                                    Image(systemName: "arrow.right")
+                                        .font(Font.title.weight(.semibold))
+                                        .foregroundStyle(Color.white)
+                                        .frame(width: 40, height: 40)
+                                }
+                            })
+                            .padding(.trailing, 35)
+                        }
+                        .navigationDestination(isPresented: $isActive){
+                            OTPVerificationView(phoneNumber: phoneNumber, password: password, email: email)
                     }
                 }
                 Spacer()
@@ -228,8 +230,14 @@ struct SignUpView : View {
 
               do {
                   try await Constants.API.supabaseClient.auth.signInWithOTP(
-                    phone: "+1" + phoneNumber
+                    phone: "+1" + phoneNumber,
+                    data: [
+                        "user_name": .string(userName),
+                        "email": .string(email),
+                        "phone_number": .string("+1" + phoneNumber),
+                      ]
                   )
+                  
                 result = .success(())
                 isActive = true
               } catch {
