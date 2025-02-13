@@ -115,6 +115,7 @@ struct Wallet : View {
                                                             DetailViewIsPresented.toggle()
                                                         }
                                                     }
+                                                
                                                     Rectangle()
                                                       .foregroundColor(.clear)
                                                       .frame(width: 398, height: 229)
