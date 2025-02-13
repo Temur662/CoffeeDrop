@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
-
+/*
+ Add Back Auth After
+ */
 struct ContentView: View {
     @EnvironmentObject var userProfile : UserProfile
     @State var isAuthenticated = false
       var body: some View {
-        Group {
+        UserRootView()
+       
+     /* Group {
           if isAuthenticated {
             UserRootView()
           } else {
@@ -28,6 +32,7 @@ struct ContentView: View {
             }
           }
         }
+      */
       }
 }
 
