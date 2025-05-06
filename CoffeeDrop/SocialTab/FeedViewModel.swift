@@ -8,6 +8,13 @@ final class FeedViewModel: ObservableObject {
     @Published var cafes: [Cafe] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var hasLoaded = false
+    
+    func loadMockDataIfNeeded() async {
+        guard !hasLoaded else { return }
+        hasLoaded = true
+        await loadMockData()
+    }
     
     func loadMockData() async {
         isLoading = true
@@ -32,21 +39,4 @@ final class FeedViewModel: ObservableObject {
             if let profilesUrl = Bundle.main.url(forResource: "mockProfiles", withExtension: "json") {
                 let profilesData = try Data(contentsOf: profilesUrl)
                 let profiles = try decoder.decode([Profile].self, from: profilesData)
-                print("DEBUG: Decoded profiles count: \(profiles.count)")
-                self.profiles = profiles
-            }
-            // Load cafes
-            if let cafesUrl = Bundle.main.url(forResource: "mockCafes", withExtension: "json") {
-                let cafesData = try Data(contentsOf: cafesUrl)
-                let cafes = try decoder.decode([Cafe].self, from: cafesData)
-                print("DEBUG: Decoded cafes count: \(cafes.count)")
-                self.cafes = cafes
-            }
-        } catch {
-            print("DEBUG: Error loading mock data: \(error)")
-            errorMessage = error.localizedDescription
-        }
-        isLoading = false
-    }
-}
-
+                print("DEBUG:

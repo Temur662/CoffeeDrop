@@ -21,7 +21,7 @@ struct FeedView: View {
             }
         }
         .task {
-            await viewModel.loadMockData()
+            await viewModel.loadMockDataIfNeeded()
         }
     }
 }
