@@ -39,4 +39,14 @@ final class FeedViewModel: ObservableObject {
             if let profilesUrl = Bundle.main.url(forResource: "mockProfiles", withExtension: "json") {
                 let profilesData = try Data(contentsOf: profilesUrl)
                 let profiles = try decoder.decode([Profile].self, from: profilesData)
-                print("DEBUG:
+                print("DEBUG: Decoded profiles count: \(profiles.count)")
+                self.profiles = profiles
+            }
+            // Load cafes (optional, add if needed)
+        } catch {
+            print("DEBUG: Error loading mock data: \(error)")
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
+    }
+}
