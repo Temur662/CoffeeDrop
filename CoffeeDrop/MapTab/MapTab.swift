@@ -34,9 +34,12 @@ struct MapTab: View {
         let region = userProfile.userLocation?.region
         return region?.center.longitude ?? 0
     }
+    
+    // State variable to manage navigation path
+    @State private var navigationPath = NavigationPath()
 
     var body: some View {
-          NavigationStack {
+        NavigationStack(path: $navigationPath) {
               ZStack(alignment: .bottom) { // Use ZStack to layer the map and the info card
                   Map(position: $locationManagerModel.cameraPosition, selection: $selectedCafeID) {
                       UserAnnotation()
@@ -87,24 +90,36 @@ struct MapTab: View {
                       }
                   }
                   
-
+                  
                   // The Info Card View
-                  if let cafe = selectedCafe {
-                      CafeInfoCardView(cafe: cafe)
-                          .transition(.move(edge: .bottom)) // Add a transition
-                          .padding() // Add some padding around the card
-                          .background(.ultraThinMaterial) // Add a translucent background
-                          .cornerRadius(10) // Rounded corners
-                          .shadow(radius: 10) // Add a shadow
-                          .padding(.horizontal) // Horizontal padding from the screen edges
-                          .animation(.easeInOut, value: selectedCafe) // Animate changes to selectedCafe
-                          .safeAreaPadding(.bottom, 15) // Adjust the value (e.g., 15) as needed for spacing
-
-                  }
+                  cafeInfoCardOverlay
               }
+              .navigationDestination(for: GooglePlacesApiPlaceInfo.self) { cafe in
+                 CafeDetailFullScreenView(cafe: cafe)
+                    .navigationBarHidden(true)
+             }
           }
           .edgesIgnoringSafeArea(.vertical)
       }
+    @ViewBuilder
+       private var cafeInfoCardOverlay: some View {
+           if let cafe = selectedCafe {
+               CafeInfoCardView(cafe: cafe)
+                   .transition(.move(edge: .bottom)) // Add a transition
+                   .padding() // Internal padding of the card content
+                   .background(.ultraThinMaterial) // Add a translucent background
+                   .cornerRadius(10) // Rounded corners
+                   .shadow(radius: 10) // Add a shadow
+                   .padding(.horizontal) // Horizontal padding from the screen edges
+                   // Use safeAreaPadding to add space above the bottom safe area (including tab bar)
+                   .safeAreaPadding(.bottom, 15) // Adjust the value (e.g., 15) as needed for spacing
+                   .animation(.easeInOut, value: selectedCafe) // Animate changes to selectedCafe
+                   .onTapGesture {
+                       // When the compact card is tapped, navigate to the full detail view
+                       navigationPath.append(cafe)
+                   }
+           }
+       }
 }
 
 
@@ -154,85 +169,9 @@ struct CafeInfoCardView: View {
                     }
                 }
             }
-
-            // Add more details here as available in GooglePlacesApiPlaceInfo
-            // Example:
-            // if let rating = cafe.rating {
-            //     Text("Rating: \(rating, specifier: "%.1f")")
-            //         .font(.subheadline)
-            // }
-            // Text("Latitude: \(cafe.geometry.location.latitude, specifier: "%.4f")")
-            // Text("Longitude: \(cafe.geometry.location.longitude, specifier: "%.4f")")
-
-            // Add a button or gesture to dismiss the card if needed
-             // Button("Close") {
-             //     // You would need a binding or environment variable to dismiss
-             // }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading) // Make the card fill the width
     }
 }
 
-
-
-
-//func GetCafesNearMe(){
-//    //  If no location just return else return with user info
-//    guard userProfile.userLocation != nil else { return }
-//    
-//    let googleMapsKey = ProcessInfo.processInfo.environment["GOOGLE_PLACES_KEY"]!
-//    //  Filter Api Results that match these queries
-//    print(userLatitude, userlongitude)
-//    let jsonData = [
-//        "includedTypes": [
-//            "cafe"  //  Return Cafes
-//        ],
-//        "maxResultCount": 3,    // Num results returned
-//        "locationRestriction": [
-//            "circle": [
-//                "center": [
-//                    "latitude": userLatitude,
-//                    "longitude": userlongitude
-//                ],
-//                "radius": 1609.34
-//            ]
-//        ]
-//    ] as [String : Any]
-//    
-//    
-//    let data = try! JSONSerialization.data(withJSONObject: jsonData, options: [])
-//    
-//    let url = URL(string: "https://places.googleapis.com/v1/places:searchNearby")!
-//    let headers = [
-//        "Content-Type": "application/json",
-//        "X-Goog-Api-Key": googleMapsKey,
-//        "X-Goog-FieldMask": "places.id,places.displayName,places.rating,places.reviews,places.regularOpeningHours,places.formattedAddress,places.location"
-//    ]
-//    
-//    var request = URLRequest(url: url)
-//    request.httpMethod = "POST"
-//    request.allHTTPHeaderFields = headers
-//    request.httpBody = data as Data
-//    
-//    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-//        if let error = error {
-//            print(error)
-//        } else if let data = data {
-//            do {
-//                let jsonDecoder = JSONDecoder()
-//                let placesResponse = try jsonDecoder.decode(GooglePlacesApiResponse.self, from: data)
-//                // Now you have your array of places
-//                DispatchQueue.main.async { // Update UI on the main thread
-//                    cafesNearMe = placesResponse.places
-//                }
-//            } catch {
-//                print("Decoding error: \(error)") // Handle decoding errors!
-//                if let decodingError = error as? DecodingError {
-//                    print("Decoding Error Details: \(decodingError)") // Print details
-//                }
-//            }
-//        }
-//    }
-//    task.resume()
-//}

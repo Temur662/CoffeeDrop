@@ -1,51 +1,34 @@
 import Foundation
 import CoreLocation // Needed for CLLocationCoordinate2D
 
-// Assume you have these structs defined elsewhere based on your Google Places API response
-// Make sure they are Decodable and Identifiable as needed
-struct GooglePlacesApiPlaceInfo: Equatable, Decodable, Identifiable {
-    let id: String
-    let displayName: DisplayName
-    let rating: Double? // Rating might not exist for all places, make it optional
-    let reviews: [Reviews]? // Reviews array might be nil or empty, make it optional
-    let regularOpeningHours: RegularOpeningHours? // Opening hours might not be available, make it optional
-    let formattedAddress: String? // formattedAddress might not always be present, make it optional
-    let location: PlaceLocation // <<< Added location field
-
-    // Conforming to Equatable
-    static func == (lhs: GooglePlacesApiPlaceInfo, rhs: GooglePlacesApiPlaceInfo) -> Bool {
-        lhs.id == rhs.id
-    }
-}
-
-struct DisplayName: Equatable, Decodable {
+struct DisplayName: Equatable, Decodable, Hashable {
     let text: String
     let languageCode: String
 }
 
-struct PlaceText: Decodable {
+struct PlaceText: Decodable, Hashable {
     let text: String
     // let languageCode: String?
 }
 
-struct AuthorAttribution: Decodable {
+struct AuthorAttribution: Decodable, Hashable {
      let displayName: String
      let uri: String
      let photoUri: String
 }
 
-struct Period: Decodable {
+struct Period: Decodable, Hashable {
     let open: DayTimePoint?
     let close: DayTimePoint?
 }
 
-struct DayTimePoint: Decodable {
+struct DayTimePoint: Decodable, Hashable {
     let day: Int // 0-6 Sunday-Saturday
     let hour: Int // 0-23
     let minute: Int // 0-59
 }
 
-struct Reviews: Decodable, Identifiable {
+struct Reviews: Decodable, Identifiable, Hashable {
     let id = UUID() // Provide a default ID as Reviews in API might not have one
     let relativePublishTimeDescription: String
     let rating: CGFloat // Review rating is often int or double
@@ -59,7 +42,7 @@ struct Reviews: Decodable, Identifiable {
      }
 }
 
-struct RegularOpeningHours : Decodable{
+struct RegularOpeningHours : Decodable, Hashable {
     // Add properties for opening hours (e.g., weekdayText: [String])
     // Make sure these properties are Equatable
     let openNow: Bool
@@ -67,9 +50,46 @@ struct RegularOpeningHours : Decodable{
     let weekdayDescriptions: [String]
 }
 
-struct PlaceLocation: Equatable, Decodable {
+struct PlaceLocation: Equatable, Decodable, Hashable {
     let latitude: Double
     let longitude: Double
+}
+
+enum PriceLevel : String, Decodable, Equatable, Hashable {
+    case PRICE_LEVEL_UNSPECIFIED
+    case PRICE_LEVEL_FREE
+    case PRICE_LEVEL_INEXPENSIVE
+    case PRICE_LEVEL_MODERATE
+    case PRICE_LEVEL_EXPENSIVE
+    case PRICE_LEVEL_VERY_EXPENSIVE
+    // Helper to get the dollar sign string
+    var dollarSigns: String {
+        switch self {
+        case .PRICE_LEVEL_FREE: return "Free" // Or "" if you prefer no symbol
+        case .PRICE_LEVEL_INEXPENSIVE: return "$"
+        case .PRICE_LEVEL_MODERATE: return "$$"
+        case .PRICE_LEVEL_EXPENSIVE: return "$$$"
+        case .PRICE_LEVEL_VERY_EXPENSIVE: return "$$$$" // Adjust based on how many signs you want
+        case .PRICE_LEVEL_UNSPECIFIED: return "" // Or "?"
+        }
+    }
+}
+
+struct GooglePlacesApiPlaceInfo: Equatable, Decodable, Identifiable, Hashable {
+    let id: String
+    let displayName: DisplayName
+    let rating: Double? // Rating might not exist for all places, make it optional
+    let reviews: [Reviews]? // Reviews array might be nil or empty, make it optional
+    let regularOpeningHours: RegularOpeningHours? // Opening hours might not be available, make it optional
+    let websiteUri : String?
+    let formattedAddress: String? // formattedAddress might not always be present, make it optional
+    let location: PlaceLocation // <<< Added location field
+    let priceLevel : PriceLevel
+    let types : [String]
+    // Conforming to Equatable
+    static func == (lhs: GooglePlacesApiPlaceInfo, rhs: GooglePlacesApiPlaceInfo) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
 struct GooglePlacesApiResponse: Decodable {
@@ -119,7 +139,7 @@ class CafeFetcher: ObservableObject {
             "Content-Type": "application/json",
             "X-Goog-Api-Key": googleMapsKey,
             // Request necessary fields including geometry for location
-            "X-Goog-FieldMask": "places.id,places.displayName,places.rating,places.reviews,places.regularOpeningHours,places.formattedAddress,places.location"
+            "X-Goog-FieldMask": "places.id,places.displayName,places.rating,places.reviews,places.regularOpeningHours,places.formattedAddress,places.location,places.websiteUri,places.priceLevel,places.types"
         ]
 
         var request = URLRequest(url: url)
