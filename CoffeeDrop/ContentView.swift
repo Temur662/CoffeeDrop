@@ -19,7 +19,7 @@ struct ContentView: View {
           if isAuthenticated {
             UserRootView()
           } else {
-              AuthRootLayout()
+            AuthRootLayout()
           }
         }
         .task {
