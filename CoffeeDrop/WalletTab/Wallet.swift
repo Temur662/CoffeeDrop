@@ -34,7 +34,7 @@ struct Wallet : View {
     var body : some View {
         ZStack{
             
-            Color(red: 0.96, green: 0.96, blue: 0.96)
+            Color(red: 0.88, green: 0.9, blue: 0.93)
             
             VStack{
                 Rectangle()
@@ -43,38 +43,40 @@ struct Wallet : View {
                     .background(Color(red: 0.88, green: 0.9, blue: 0.93))
                     .overlay(alignment: .top){
                         VStack(alignment : .leading){
-                            if DetailViewIsPresented {
-                                Button( action : {
-                                    withAnimation {
-                                        DetailViewIsPresented.toggle()
-                                    }} ){
-                                        Circle()
-                                            .fill(Color.white)
-                                            .frame(width: 25, height: 25)
-                                            .overlay(
-                                                Image(systemName: "chevron.left")
-                                                    .resizable()
-                                                    .foregroundStyle(.black)
-                                                    .frame(width: 8, height: 8)
-                                                    .aspectRatio(contentMode: .fit)
-                                                    .padding()
-                                            )
-                                            .shadow(radius: 3, y : 3)
-                                    }
-                            }
+                            
                             HStack{
+                                if DetailViewIsPresented {
+                                    Button( action : {
+                                        withAnimation {
+                                            DetailViewIsPresented.toggle()
+                                        }} ){
+                                            Circle()
+                                                .fill(Color.white)
+                                                .frame(width: 25, height: 25)
+                                                .overlay(
+                                                    Image(systemName: "chevron.left")
+                                                        .resizable()
+                                                        .foregroundStyle(.black)
+                                                        .frame(width: 8, height: 8)
+                                                        .aspectRatio(contentMode: .fit)
+                                                        .padding()
+                                                )
+                                                .shadow(radius: 3, y : 3)
+                                        }
+                                }
                                 Text("Wallet")
-                                    .font(.largeTitle)
-                                    .fontWeight(.bold)
+                                    .font(.system(size : 36))
+                                    .fontWeight(.regular)
+                                
                                 Spacer()
                                 Circle()
                                     .fill(Color(red: 0.56, green: 0.85, blue: 0.98))
-                                    .frame(width: 25, height: 25)
+                                    .frame(width: 35, height: 35)
                                     .overlay(
                                         Image(systemName: "plus")
                                             .resizable()
                                             .foregroundStyle(.white)
-                                            .frame(width: 8, height: 8)
+                                            .frame(width: 15, height: 15)
                                             .aspectRatio(contentMode: .fit)
                                             .padding()
                                     )
@@ -97,80 +99,71 @@ struct Wallet : View {
                                 ForEach(Array(cards.enumerated()), id :\.0) { index, card in
                                     Capsule()
                                         .foregroundStyle(index == CurrentCard ? Color(red: 0.77, green: 0.77, blue: 0.77).opacity(InterpolatedOpacityValue) : index == NextCard ? Color(red: 0.77, green: 0.77, blue: 0.77).opacity(NextInterpolatedOpacityValue) : Color(red: 0.77, green: 0.77, blue: 0.77).opacity(0.2))
-                                    
-                                        .frame(width: index == CurrentCard ? CurrentIndicatorWidth + 10 : index == NextCard ? 10 + NextIndicatorWidth  : 10, height: 10)
+                                        .frame(width: index == CurrentCard ? CurrentIndicatorWidth + 10 : index == NextCard ? 10 + NextIndicatorWidth  : 10, height:  index == CurrentCard ? (CurrentIndicatorWidth / 28) + 4 : index == NextCard ? 4 + (NextIndicatorWidth / 28) : 4 )
+                                        .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                        .inset(by: 0.3)
+                                        .stroke(Color(red: 0.77, green: 0.76, blue: 0.76), lineWidth: 0.6)
+
+                                        )
                                 }
                             }
                             ScrollView(.horizontal, showsIndicators: false){
                                 let width = geo.size.width
                                 HStack{
                                     ForEach(Array(cards.enumerated()), id :\.0) { index, card in
-                                        VStack{
-                                            ZStack(alignment: .topTrailing){
-                                                CardView(card : card)
-                                                    .frame(width : width)
-                                                    .offset(y : 0)
-                                                    .matchedGeometryEffect(id: card.card_id, in: CardAnimation)
-                                                    .onTapGesture {
-                                                        withAnimation {
-                                                            DetailViewIsPresented.toggle()
-                                                        }
+                                        VStack(spacing: -50) {
+                                            CardView(card: card)
+                                                .frame(width: width, height: 199)
+                                                .matchedGeometryEffect(id: card.card_id, in: CardAnimation)
+                                                .onTapGesture {
+                                                    withAnimation {
+                                                        DetailViewIsPresented.toggle()
                                                     }
-                                                    Rectangle()
-                                                      .foregroundColor(.clear)
-                                                      .frame(width: 50, height: 20)
-                                                      .background(
-                                                        LinearGradient(
-                                                          stops: [
-                                                            Gradient.Stop(color: Color(red: 0.95, green: 0.95, blue: 0.95).opacity(0.5), location: 0.00),
-                                                            Gradient.Stop(color: Color(red: 0.55, green: 0.55, blue: 0.55).opacity(0.2), location: 1.00),
-                                                          ],
-                                                          startPoint: UnitPoint(x: 0, y: 0),
-                                                          endPoint: UnitPoint(x: 1, y: 1)
-                                                        )
-                                                      )
-                                                      .cornerRadius(15)
-                                                      .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 20)
-                                                      .overlay(
-                                                        RoundedRectangle(cornerRadius: 15)
-                                                          .inset(by: 0.5)
-                                                          .stroke(.white.opacity(0.6), lineWidth: 1)
-                                                      )
-                                                      .blur(radius: 10)
-                                            }
+                                                }
+                                                .zIndex(0) // put the card behind
                                             
                                             Rectangle()
-                                                .foregroundColor(.clear)
-                                                .frame(width: 398, height: 229)
-                                                .background(.white)
+                                                .foregroundColor(.white)
+                                                .frame(height: 220)
                                                 .cornerRadius(15)
-                                                .offset(y : -40)
-                                                .zIndex(1)
+                                                .clipShape(.rect(
+                                                    topLeadingRadius: 20,
+                                                    bottomLeadingRadius: 5,
+                                                    bottomTrailingRadius: 5,
+                                                    topTrailingRadius: 20
+                                                ))
+                                                .zIndex(1) // put the rectangle in front
                                                 .overlay(
-                                                    VStack{
-                                                        HStack{
-                                                            Text("Current Balance ")
-                                                                .font(.headline)
-                                                                .multilineTextAlignment(.center)
-                                                                .foregroundColor(Color(red: 0.67, green: 0.67, blue: 0.67))
-                                                            
-                                                            Text("$XX.XX")
-                                                                .font(.title)
-                                                                .fontWeight(.bold)
-                                                                .multilineTextAlignment(.center)
-                                                                .foregroundColor(.black)
-                                                                .frame(width: 121, height: 21, alignment: .center)
+                                                    VStack(spacing : 20){
+                                                        
+                                                        Group{
+                                                            HStack{
+                                                                Text("Current Balance ")
+                                                                    .font(.headline)
+                                                                    .multilineTextAlignment(.leading)
+                                                                    .foregroundColor(Color(red: 0.67, green: 0.67, blue: 0.67))
+                                                                
+                                                                Text("$XX.XX")
+                                                                    .font(.title)
+                                                                    .fontWeight(.bold)
+                                                                    .multilineTextAlignment(.center)
+                                                                    .foregroundColor(.black)
+                                                                Spacer()
+                                                            }
                                                         }
-                                                        HStack{
-                                                            Text("Add Funds")
-                                                                .font(.headline)
-                                                                .multilineTextAlignment(.center)
-                                                                .foregroundColor(Color(red: 0.67, green: 0.67, blue: 0.67))
-                                                            Spacer()
-                                                            Spacer()
-                                                        }
-                                                        VStack{
-                                                            
+                                                        .padding(.horizontal)
+                                                        
+                                                        Group{
+                                                            HStack{
+                                                                Text("Add Funds")
+                                                                    .font(.headline)
+                                                                    .multilineTextAlignment(.center)
+                                                                    .foregroundColor(Color(red: 0.67, green: 0.67, blue: 0.67))
+                                                                Spacer()
+                                                                Spacer()
+                                                            }
+
                                                             HStack{
                                                                 ForEach(AddFundsButtons, id : \.self){ fund in
                                                                     Rectangle()
@@ -190,7 +183,6 @@ struct Wallet : View {
                                                                         )
                                                                 }
                                                             }
-                                                            
                                                             Rectangle()
                                                                 .foregroundColor(.clear)
                                                                 .frame(width: 144, height: 48)
@@ -206,24 +198,61 @@ struct Wallet : View {
                                                                                 .foregroundColor(Color(red: 0.54, green: 0.32, blue: 0.16))
                                                                         )
                                                                 )
-                                                            
-                                                            Rectangle()
-                                                                .foregroundColor(.clear)
-                                                                .frame(width: 398, height: 73)
-                                                                .background(.white)
-                                                                .cornerRadius(15)
-                                                                .overlay(
-                                                                    HStack{
-                                                                        
-                                                                    }
-                                                                )
-                                                            
                                                         }
-                                                    }
+                                                        .padding(.horizontal)
+
+                                                        }
+                                                        .padding(.vertical)
                                                 )
-                                                .padding(.horizontal)
+                                                .padding(.horizontal, 20)
+                                            
+                                            Group{
+                                                VStack(spacing : 10){
+                                                    Rectangle()
+                                                        .foregroundColor(.clear)
+                                                        .frame(height: 73)
+                                                        .background(.white)
+                                                        .cornerRadius(15)
+                                                        .overlay(
+                                                            HStack{
+                                                                Circle()
+                                                                    .fill(Color.black)
+                                                                    .frame(width: 30, height: 30)
+                                                                
+                                                                Image(systemName : "chevron-right")
+                                                                    .resizable()
+                                                                    .frame(width: 20, height: 20)
+                                                            }
+                                                        )
+                                                    
+                                                    Rectangle()
+                                                        .foregroundColor(.clear)
+                                                        .frame(height: 73)
+                                                        .background(.white)
+                                                        .cornerRadius(15)
+                                                        .overlay(
+                                                            HStack{
+                                                                Circle()
+                                                                    .fill(Color.black)
+                                                                    .frame(width: 30, height: 30)
+                                                                
+                                                                Image(systemName : "chevron-right")
+                                                                    .resizable()
+                                                                    .frame(width: 20, height: 20)
+                                                            }
+                                                        )
+                                                    
+                                                }
+                                           }
+                                            .padding(.horizontal, 20)
+                                            .padding(.top, 55)
+
+
+                                            
+
                                         }
-                                        .background(
+                                     
+                                          .background(
                                             //  Pagination BackGroundTask
                                             GeometryReader{ geo -> Color in
                                                 DispatchQueue.main.async {
@@ -254,10 +283,7 @@ struct Wallet : View {
                                                 return Color.clear
                                             }
                                         )
-                                        .padding(.top, 10)
-                                        
                                         //  End of Cards
-                                        
                                     }
                                 }
                                 .scrollTargetLayout()
@@ -265,7 +291,7 @@ struct Wallet : View {
                             .scrollTargetBehavior(.viewAligned)
                             .scrollBounceBehavior(.basedOnSize)
                         }
-                        .padding(.top, 120)
+                        .padding(.top, 80)
                     }
                 } else {
                         ZStack {
@@ -337,3 +363,89 @@ struct Wallet : View {
 }
     
 
+
+/*
+ Rectangle()
+     .foregroundColor(.clear)
+     .background(.white)
+     .frame(height : 200)
+     .cornerRadius(15)
+     .offset(y : 50)
+     .clipShape(.rect(
+         topLeadingRadius: 20,
+         bottomLeadingRadius: 5,
+         bottomTrailingRadius: 5,
+         topTrailingRadius: 20
+     ))
+     .overlay(
+         VStack(spacing : 20){
+             
+             Group{
+                 HStack{
+                     Text("Current Balance ")
+                         .font(.headline)
+                         .multilineTextAlignment(.leading)
+                         .foregroundColor(Color(red: 0.67, green: 0.67, blue: 0.67))
+                     
+                     Text("$XX.XX")
+                         .font(.title)
+                         .fontWeight(.bold)
+                         .multilineTextAlignment(.center)
+                         .foregroundColor(.black)
+                     Spacer()
+                 }
+             }
+             .padding(.horizontal)
+             
+             Group{
+                 HStack{
+                     Text("Add Funds")
+                         .font(.headline)
+                         .multilineTextAlignment(.center)
+                         .foregroundColor(Color(red: 0.67, green: 0.67, blue: 0.67))
+                     Spacer()
+                     Spacer()
+                 }
+
+                 HStack{
+                     ForEach(AddFundsButtons, id : \.self){ fund in
+                         Rectangle()
+                             .foregroundColor(.clear)
+                             .frame(width: 94, height: 33)
+                             .background(.white)
+                             .cornerRadius(10)
+                             .overlay(
+                                 RoundedRectangle(cornerRadius: 10)
+                                     .inset(by: 0.5)
+                                     .stroke(Color(red: 0.54, green: 0.32, blue: 0.16).opacity(0.5), lineWidth: 1)
+                                     .overlay(
+                                         Text("$\(fund)")
+                                             .multilineTextAlignment(.center)
+                                             .foregroundColor(Color(red: 0.54, green: 0.32, blue: 0.16))
+                                     )
+                             )
+                     }
+                 }
+                 Rectangle()
+                     .foregroundColor(.clear)
+                     .frame(width: 144, height: 48)
+                     .background(.white)
+                     .cornerRadius(10)
+                     .overlay(
+                         RoundedRectangle(cornerRadius: 10)
+                             .inset(by: 0.5)
+                             .stroke(Color(red: 0.54, green: 0.32, blue: 0.16).opacity(0.5), lineWidth: 1)
+                             .overlay(
+                                 Text("+\n Other Amount")
+                                     .multilineTextAlignment(.center)
+                                     .foregroundColor(Color(red: 0.54, green: 0.32, blue: 0.16))
+                             )
+                     )
+             }
+             .padding(.horizontal)
+
+             }
+     )
+     .padding(.horizontal, 20)
+     .border(.black)
+ */

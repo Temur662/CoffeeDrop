@@ -5,6 +5,14 @@
 //  Created by Temurbek Sayfutdinov on 2/1/25.
 //
 
+
+/*
+ 
+ Group Components
+ 
+ Apply Contraists on box
+ 
+ */
 import SwiftUI
 import MapKit
 
@@ -146,7 +154,7 @@ struct Home: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 150)
-                    
+                    .padding(.bottom, 50)
                     // Top Layer (Header)
                     GeometryReader { gr in
                         VStack {

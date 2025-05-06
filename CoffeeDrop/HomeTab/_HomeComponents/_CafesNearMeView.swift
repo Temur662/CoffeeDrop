@@ -6,46 +6,91 @@
 //
 
 import SwiftUI
+import MapKit
+//struct PlaceLocation: Decodable {
+//    let latitude: Double
+//    let longitude: Double
+//}
+//
+//struct DisplayName: Decodable {
+//    let text: String
+//    // let languageCode: String? // Often included
+//}
+//
+//struct Period: Decodable {
+//    let open: DayTimePoint?
+//    let close: DayTimePoint?
+//}
+//
+//struct DayTimePoint: Decodable {
+//    let day: Int // 0-6 Sunday-Saturday
+//    let hour: Int // 0-23
+//    let minute: Int // 0-59
+//}
+//
+//struct RegularOpeningHours: Decodable {
+//    let openNow: Bool
+//    let periods: [Period]
+//    let weekdayDescriptions: [String]
+//}
+//
+//struct PlaceText: Decodable {
+//    let text: String
+//    // let languageCode: String?
+//}
+//
+//struct AuthorAttribution: Decodable {
+//     let displayName: String
+//     let uri: String
+//     let photoUri: String
+//}
+//
+//
+//// Reviews might have more structure
+//struct Reviews: Decodable, Identifiable {
+//    let id = UUID() // Provide a default ID as Reviews in API might not have one
+//    let relativePublishTimeDescription: String
+//    let rating: CGFloat // Review rating is often int or double
+//    let text: PlaceText // Contains actual review text
+//    let authorAttribution: AuthorAttribution // Info about reviewer
+//
+//    // Use CodingKeys if your struct names don't match JSON keys exactly
+//    // or to handle nested data that doesn't need its own struct type
+//     private enum CodingKeys: String, CodingKey {
+//         case relativePublishTimeDescription, rating, text, authorAttribution
+//     }
+//}
+//
+//// --- Main Place Info Struct ---
+//// Updated to include 'location' and 'formattedAddress'
+//// Made optional properties for fields that might not always be present (rating, reviews, hours, address)
+//struct GooglePlacesApiPlaceInfo: Equatable, Decodable, Identifiable {
+//    let id: String
+//    let displayName: DisplayName
+//    let rating: Double // Rating might not exist for all places
+//    let reviews: [Reviews] // Reviews array might be nil or empty
+//    let regularOpeningHours: RegularOpeningHours // Opening hours might not be available
+//    let formattedAddress: String // Requesting this field too
+//    let location: PlaceLocation // <<< Added location field
+//    static func == (lhs: GooglePlacesApiPlaceInfo, rhs: GooglePlacesApiPlaceInfo) -> Bool {
+//       // For types with a unique identifier like 'id', comparing IDs is usually sufficient
+//       lhs.id == rhs.id
+//   }
+//}
+//
+//// --- Overall API Response Structure ---
+//struct GooglePlacesApiResponse: Decodable {
+//    let places: [GooglePlacesApiPlaceInfo]
+//    // You might get other fields like nextPageToken if there are more results
+//}
 
-struct GooglePlacesApiPlaceInfo : Decodable, Identifiable {
-    let displayName : DisplayName
-    let rating : CGFloat
-    let reviews : [Reviews]
-    let regularOpeningHours : RegularOpeningHours
-    let id : String
-}
-struct Reviews : Decodable {
-    let name : String
-    let rating : CGFloat
-    let text : ReviewsText
-}
-struct ReviewsText : Decodable {
-    let text : String
-    let languageCode : String
-}
-struct DisplayName: Decodable {
-    let text: String
-    let languageCode: String
-}
-
-struct RegularOpeningHours : Decodable {
-    let openNow : Bool
-    let nextCloseTime : String
-}
-
-struct GooglePlacesApiResponse : Decodable {
-    let places : [GooglePlacesApiPlaceInfo]
-    
-    enum CodingKeys: String, CodingKey {
-           case places
-    }
-}
 
 
 struct CafesNearMeView : View {
     @EnvironmentObject var userProfile: UserProfile // UserProfile Object
     @State private var cafesNearMe : [GooglePlacesApiPlaceInfo] = []
-    
+    @StateObject private var cafeFetcher = CafeFetcher()
+    @StateObject private var locationManagerModel = ContentViewModel()
     var userLatitude : CGFloat {
         let region = userProfile.userLocation?.region
         return region?.center.latitude ?? 0
@@ -54,78 +99,89 @@ struct CafesNearMeView : View {
         let region = userProfile.userLocation?.region
         return region?.center.longitude ?? 0
     }
+    
     var body: some View {
         ScrollView(.horizontal){
             HStack(spacing : 8){
-                ForEach(cafesNearMe){ place in
-                    CafeNearMeCard(place: place, rating : place.rating)
+                ForEach(cafeFetcher.cafes){ place in
+                    CafeNearMeCard(place: place, rating : place.rating ?? 0)
                 }
             }
         }
-        //.onChange(of: userProfile.userLocation ){ oldstate, newState in
-         //   GetCafesNearMe()
-        //}
+        .onAppear {
+            locationManagerModel.checkIfLocationServicesEnabled()
+            // Trigger initial fetch if location is already available on appear
+           if let location = userProfile.userLocation {
+               cafeFetcher.fetchCafes(near: CLLocationCoordinate2D(latitude :location.region?.center.latitude ?? 0, longitude: location.region?.center.longitude ?? 0), numResults: 3)
+           }
+        }
+        .onChange(of: userProfile.userLocation ){ oldstate, newState in
+            if let location = newState {
+                 // Call the fetcher's method with the new location
+                cafeFetcher.fetchCafes(near: CLLocationCoordinate2D(latitude :location.region?.center.latitude ?? 0, longitude: location.region?.center.longitude ?? 0), numResults: 3)
+            }
+        }
     }
     
-    func GetCafesNearMe(){
-        //  If no location just return else return with user info
-        guard userProfile.userLocation != nil else { return }
-        
-        let googleMapsKey = ProcessInfo.processInfo.environment["GOOGLE_PLACES_KEY"]!
-        //  Filter Api Results that match these queries
-        print(userLatitude, userlongitude)
-        let jsonData = [
-            "includedTypes": [
-                "cafe"  //  Return Cafes
-            ],
-            "maxResultCount": 3,    // Num results returned
-            "locationRestriction": [
-                "circle": [
-                    "center": [
-                        "latitude": userLatitude,
-                        "longitude": userlongitude
-                    ],
-                    "radius": 1609.34
-                ]
-            ]
-        ] as [String : Any]
-        
-        
-        let data = try! JSONSerialization.data(withJSONObject: jsonData, options: [])
-        
-        let url = URL(string: "https://places.googleapis.com/v1/places:searchNearby")!
-        let headers = [
-            "Content-Type": "application/json",
-            "X-Goog-Api-Key": googleMapsKey,
-            "X-Goog-FieldMask": "places.id,places.displayName,places.rating,places.reviews,places.regularOpeningHours"
-        ]
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.allHTTPHeaderFields = headers
-        request.httpBody = data as Data
-        
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let error = error {
-                print(error)
-            } else if let data = data {
-                do {
-                    let jsonDecoder = JSONDecoder()
-                    let placesResponse = try jsonDecoder.decode(GooglePlacesApiResponse.self, from: data)
-                    // Now you have your array of places
-                    DispatchQueue.main.async { // Update UI on the main thread
-                        cafesNearMe = placesResponse.places
-                    }
-                } catch {
-                    print("Decoding error: \(error)") // Handle decoding errors!
-                    if let decodingError = error as? DecodingError {
-                        print("Decoding Error Details: \(decodingError)") // Print details
-                    }
-                }
-            }
-        }
-        task.resume()
-    }
+//    func GetCafesNearMe(){
+//        //  If no location just return else return with user info
+//        guard userProfile.userLocation != nil else { return }
+//        print("Running Get Cafe Near Me")
+//        let googleMapsKey = ProcessInfo.processInfo.environment["GOOGLE_PLACES_KEY"]!
+//        //  Filter Api Results that match these queries
+//        print(userLatitude, userlongitude)
+//        let jsonData = [
+//            "includedTypes": [
+//                "cafe"  //  Return Cafes
+//            ],
+//            "maxResultCount": 3,    // Num results returned
+//            "locationRestriction": [
+//                "circle": [
+//                    "center": [
+//                        "latitude": userLatitude,
+//                        "longitude": userlongitude
+//                    ],
+//                    "radius": 1609.34
+//                ]
+//            ]
+//        ] as [String : Any]
+//        
+//        
+//        let data = try! JSONSerialization.data(withJSONObject: jsonData, options: [])
+//        
+//        let url = URL(string: "https://places.googleapis.com/v1/places:searchNearby")!
+//        let headers = [
+//            "Content-Type": "application/json",
+//            "X-Goog-Api-Key": googleMapsKey,
+//            "X-Goog-FieldMask": "places.id,places.displayName,places.rating,places.reviews,places.regularOpeningHours,places.formattedAddress,places.location"
+//        ]
+//        
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "POST"
+//        request.allHTTPHeaderFields = headers
+//        request.httpBody = data as Data
+//        
+//        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+//            if let error = error {
+//                print(error)
+//            } else if let data = data {
+//                do {
+//                    let jsonDecoder = JSONDecoder()
+//                    let placesResponse = try jsonDecoder.decode(GooglePlacesApiResponse.self, from: data)
+//                    // Now you have your array of places
+//                    DispatchQueue.main.async { // Update UI on the main thread
+//                        cafesNearMe = placesResponse.places
+//                    }
+//                } catch {
+//                    print("Decoding error: \(error)") // Handle decoding errors!
+//                    if let decodingError = error as? DecodingError {
+//                        print("Decoding Error Details: \(decodingError)") // Print details
+//                    }
+//                }
+//            }
+//        }
+//        task.resume()
+//    }
 }
 
 struct CafeNearMeCard : View {
@@ -155,7 +211,7 @@ struct CafeNearMeCard : View {
                 .overlay(
                     VStack{
                         HStack{
-                            Text("\(String(format:"%.1f", place.rating))")
+                            Text("\(String(format:"%.1f", place.rating ?? 0))")
                                 .font(.caption)
                                 .foregroundStyle(Color.white)
                             ForEach(0..<5){ item in
@@ -164,15 +220,13 @@ struct CafeNearMeCard : View {
                                         .fill(Color.gray)
                                         .frame(width: 10, height: 8.8)
                                         .opacity(0.8)
-                                
                             }
                             Spacer()
-                            
                         }
                         .padding(.leading)
 
                         HStack(spacing : 1){
-                            if place.regularOpeningHours.openNow {
+                            if place.regularOpeningHours?.openNow ?? false && ((place.regularOpeningHours?.openNow) != nil) {
                                 Circle()
                                     .fill(Color.green)
                                     .frame(width: 3, height: 3)
@@ -200,15 +254,6 @@ struct CafeNearMeCard : View {
     }
 }
 
-/*
- Cafe information i need:
-    - cafe name
-    - cafe is open
-    - cafe closing hour
-    - cafe image
-    - cafe share link
-    - cafe coordinates ( lat & log )
- */
 struct Star: Shape {
     // store how many corners the star has, and how smooth/pointed it is
     let corners: Int
