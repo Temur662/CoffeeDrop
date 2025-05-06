@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Supabase
 
 @MainActor
 final class FeedViewModel: ObservableObject {
@@ -10,43 +11,69 @@ final class FeedViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var hasLoaded = false
     
-    func loadMockDataIfNeeded() async {
-        guard !hasLoaded else { return }
-        hasLoaded = true
-        await loadMockData()
-    }
-    
-    func loadMockData() async {
+    func fetchAllFromSupabase() async {
         isLoading = true
         errorMessage = nil
         do {
-            // Load posts
-            guard let postsUrl = Bundle.main.url(forResource: "mockPosts", withExtension: "json") else {
-                print("DEBUG: mockPosts.json not found in bundle")
-                errorMessage = "Mock posts file not found."
-                isLoading = false
-                return
-            }
-            print("DEBUG: mockPosts.json found at \(postsUrl)")
-            let postsData = try Data(contentsOf: postsUrl)
-            print("DEBUG: Loaded postsData, size: \(postsData.count) bytes")
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let posts = try decoder.decode([Post].self, from: postsData)
-            print("DEBUG: Decoded posts count: \(posts.count)")
-            self.posts = posts
-            // Load profiles
-            if let profilesUrl = Bundle.main.url(forResource: "mockProfiles", withExtension: "json") {
-                let profilesData = try Data(contentsOf: profilesUrl)
-                let profiles = try decoder.decode([Profile].self, from: profilesData)
-                print("DEBUG: Decoded profiles count: \(profiles.count)")
-                self.profiles = profiles
-            }
-            // Load cafes (optional, add if needed)
+            async let postsResult = fetchPostsFromSupabase()
+            async let profilesResult = fetchProfilesFromSupabase()
+            async let cafesResult = fetchCafesFromSupabase()
+            _ = try await (postsResult, profilesResult, cafesResult)
         } catch {
-            print("DEBUG: Error loading mock data: \(error)")
+            print("DEBUG: Error fetching data from Supabase: \(error)")
             errorMessage = error.localizedDescription
         }
         isLoading = false
+    }
+    
+    private func fetchPostsFromSupabase() async throws {
+        let response = try await Constants.API.supabaseClient
+            .from("posts")
+            .select()
+            .order("created_at", ascending: false)
+            .execute()
+        let data = response.data
+        
+        // Print the raw JSON to see the exact date format
+        if let jsonString = String(data: data, encoding: .utf8) {
+            print("DEBUG: Raw JSON from Supabase:", jsonString)
+        }
+        
+        let decoder = JSONDecoder()
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ"
+        decoder.dateDecodingStrategy = .formatted(dateFormatter)
+        let posts = try decoder.decode([Post].self, from: data)
+        self.posts = posts
+    }
+    
+    private func fetchProfilesFromSupabase() async throws {
+        let response = try await Constants.API.supabaseClient
+            .from("profiles")
+            .select()
+            .execute()
+        let data = response.data
+        let decoder = JSONDecoder()
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ"
+        decoder.dateDecodingStrategy = .formatted(dateFormatter)
+        let profiles = try decoder.decode([Profile].self, from: data)
+        self.profiles = profiles
+    }
+    
+    private func fetchCafesFromSupabase() async throws {
+        let response = try await Constants.API.supabaseClient
+            .from("cafes")
+            .select()
+            .execute()
+        let data = response.data
+        let cafes = try JSONDecoder().decode([Cafe].self, from: data)
+        self.cafes = cafes
+    }
+    
+    func addPost(_ post: Post) {
+        posts.insert(post, at: 0)
     }
 }

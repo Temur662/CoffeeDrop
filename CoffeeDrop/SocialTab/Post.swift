@@ -1,9 +1,10 @@
 import Foundation
+import PostgREST
 
 struct Post: Identifiable, Codable {
-    let id: String
-    let userId: String
-    let cafeId: String
+    let id: UUID
+    let userId: UUID
+    let cafeId: UUID
     let title: String
     let content: String
     let mediaUrl: String
@@ -12,7 +13,7 @@ struct Post: Identifiable, Codable {
     let updatedAt: Date
 
     enum CodingKeys: String, CodingKey {
-        case id
+        case id = "post_id"
         case userId = "user_id"
         case cafeId = "cafe_id"
         case title

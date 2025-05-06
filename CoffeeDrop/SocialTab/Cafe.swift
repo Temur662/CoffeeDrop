@@ -1,7 +1,7 @@
 import Foundation
 
 struct Cafe: Identifiable, Codable {
-    let id: String
+    let id: UUID
     let name: String
     let description: String
     let address: String
