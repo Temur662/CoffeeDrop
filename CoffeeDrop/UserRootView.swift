@@ -10,7 +10,7 @@ import MapKit
 
 struct UserRootView : View {
     @Namespace var animation
-
+    
     @State var CurrentTab : Int = 0
     var body: some View {
         TabView(selection: $CurrentTab){
@@ -19,23 +19,26 @@ struct UserRootView : View {
                     Label("Home", systemImage : "house")
                 }
                 .tag(0)
-                
-
+            
+            
             MapTab(animation: animation)
                 .tabItem{
                     Label("Map", systemImage: "map")
                 }
                 .tag(1)
-                
+            
             
             Wallet()
                 .tabItem{
                     Label("Wallet", systemImage: "wallet.bifold")
                 }
                 .tag(2)
-        
+            
+            SocialTabView()
+                .tabItem {
+                    Image("SocialFace")
+                    Text("Social")
+                }
         }
-        .animation(.default, value: CurrentTab)
     }
 }
-

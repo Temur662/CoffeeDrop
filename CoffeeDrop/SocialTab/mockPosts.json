@@ -1,0 +1,24 @@
+[
+  {
+    "id": "post-0001-0001-0001-0001-000000000001",
+    "user_id": "11111111-1111-1111-1111-111111111111",
+    "cafe_id": "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "title": "Best Latte Ever!",
+    "content": "Had the most amazing latte at Central Perk today. Highly recommend!",
+    "media_url": "https://example.com/latte.jpg",
+    "is_draft": false,
+    "created_at": "2024-06-01T12:00:00Z",
+    "updated_at": "2024-06-01T12:00:00Z"
+  },
+  {
+    "id": "post-0002-0002-0002-0002-000000000002",
+    "user_id": "22222222-2222-2222-2222-222222222222",
+    "cafe_id": "bbbbbbb2-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+    "title": "Great Vibes",
+    "content": "Bean Scene has such a chill atmosphere. Perfect for working!",
+    "media_url": "https://example.com/beanscene-vibes.jpg",
+    "is_draft": false,
+    "created_at": "2024-06-02T13:00:00Z",
+    "updated_at": "2024-06-02T13:00:00Z"
+  }
+] 

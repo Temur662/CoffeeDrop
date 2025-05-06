@@ -1,0 +1,32 @@
+[
+  {
+    "id": "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "name": "Central Perk",
+    "description": "A cozy spot for friends.",
+    "address": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zip_code": "10001",
+    "country": "USA",
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "image_url": "https://www.acouplecooks.com/wp-content/uploads/2021/05/Latte-Art-065.jpg",
+    "created_at": "2024-06-01T09:00:00Z",
+    "updated_at": "2024-06-01T09:00:00Z"
+  },
+  {
+    "id": "bbbbbbb2-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+    "name": "Bean Scene",
+    "description": "Artisan coffee and pastries.",
+    "address": "456 Elm St",
+    "city": "San Francisco",
+    "state": "CA",
+    "zip_code": "94102",
+    "country": "USA",
+    "latitude": 37.7749,
+    "longitude": -122.4194,
+    "image_url": "https://newharvestcoffee.com/cdn/shop/products/IMG_4977.jpg?v=1629834562&width=1024",
+    "created_at": "2024-06-02T10:00:00Z",
+    "updated_at": "2024-06-02T10:00:00Z"
+  }
+] 
