@@ -15,28 +15,35 @@ final class FeedViewModel: ObservableObject {
         do {
             // Load posts
             guard let postsUrl = Bundle.main.url(forResource: "mockPosts", withExtension: "json") else {
+                print("DEBUG: mockPosts.json not found in bundle")
                 errorMessage = "Mock posts file not found."
                 isLoading = false
                 return
             }
+            print("DEBUG: mockPosts.json found at \(postsUrl)")
             let postsData = try Data(contentsOf: postsUrl)
+            print("DEBUG: Loaded postsData, size: \(postsData.count) bytes")
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let posts = try decoder.decode([Post].self, from: postsData)
+            print("DEBUG: Decoded posts count: \(posts.count)")
             self.posts = posts
             // Load profiles
             if let profilesUrl = Bundle.main.url(forResource: "mockProfiles", withExtension: "json") {
                 let profilesData = try Data(contentsOf: profilesUrl)
                 let profiles = try decoder.decode([Profile].self, from: profilesData)
+                print("DEBUG: Decoded profiles count: \(profiles.count)")
                 self.profiles = profiles
             }
             // Load cafes
             if let cafesUrl = Bundle.main.url(forResource: "mockCafes", withExtension: "json") {
                 let cafesData = try Data(contentsOf: cafesUrl)
                 let cafes = try decoder.decode([Cafe].self, from: cafesData)
+                print("DEBUG: Decoded cafes count: \(cafes.count)")
                 self.cafes = cafes
             }
         } catch {
+            print("DEBUG: Error loading mock data: \(error)")
             errorMessage = error.localizedDescription
         }
         isLoading = false

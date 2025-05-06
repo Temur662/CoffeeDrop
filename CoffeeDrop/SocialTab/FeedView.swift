@@ -4,25 +4,37 @@ struct FeedView: View {
     @StateObject private var viewModel = FeedViewModel()
     
     var body: some View {
-        Group {
+        VStack {
             if viewModel.isLoading {
                 ProgressView()
             } else if let error = viewModel.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
+                Text(error).foregroundColor(.red)
             } else {
                 ScrollView {
                     LazyVStack(spacing: 24) {
                         ForEach(viewModel.posts) { post in
-                            let user = viewModel.profiles.first { $0.id == post.userId }
-                            let cafe = viewModel.cafes.first { $0.id == post.cafeId }
-                            PostCardView(post: post, user: user, cafe: cafe)
+                            PostCardWrapper(post: post, profiles: viewModel.profiles, cafes: viewModel.cafes)
                         }
                     }
                     .padding(.vertical)
                 }
             }
         }
+        .task {
+            await viewModel.loadMockData()
+        }
+    }
+}
+
+struct PostCardWrapper: View {
+    let post: Post
+    let profiles: [Profile]
+    let cafes: [Cafe]
+
+    var body: some View {
+        let user = profiles.first { $0.id == post.userId }
+        let cafe = cafes.first { $0.id == post.cafeId }
+        PostCardView(post: post, user: user, cafe: cafe)
     }
 }
 
