@@ -38,26 +38,9 @@
 		A7F067FE2D4E765B00F8722B /* CoffeeDropUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoffeeDropUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		B52A131B2DCA59F8000F0A99 /* Exceptions for "CoffeeDrop" folder in "CoffeeDropTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				SocialTab/mockCafes.json,
-				SocialTab/mockComments.json,
-				SocialTab/mockLikes.json,
-				SocialTab/mockPosts.json,
-				SocialTab/mockProfiles.json,
-			);
-			target = A7F067F32D4E765B00F8722B /* CoffeeDropTests */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A7F067E62D4E765A00F8722B /* CoffeeDrop */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				B52A131B2DCA59F8000F0A99 /* Exceptions for "CoffeeDrop" folder in "CoffeeDropTests" target */,
-			);
 			path = CoffeeDrop;
 			sourceTree = "<group>";
 		};

@@ -32,8 +32,8 @@ struct PostCardWrapper: View {
     let cafes: [Cafe]
 
     var body: some View {
-        let user = profiles.first { $0.id == "\(post.userId)" }
-        let cafe = cafes.first { $0.id == "\(post.cafeId)" }
+        let user = profiles.first { $0.id.uuidString == "\(post.userId)" }
+        let cafe = cafes.first { $0.id.uuidString == "\(post.cafeId)" }
         PostCardView(post: post, user: user, cafe: cafe)
     }
 }

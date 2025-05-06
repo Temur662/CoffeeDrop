@@ -17,8 +17,8 @@ final class FeedViewModel: ObservableObject {
         do {
             async let postsResult = fetchPostsFromSupabase()
             async let profilesResult = fetchProfilesFromSupabase()
-            async let cafesResult = fetchCafesFromSupabase()
-            _ = try await (postsResult, profilesResult, cafesResult)
+            //async let cafesResult = fetchCafesFromSupabase()
+            _ = try await (postsResult, profilesResult)
         } catch {
             print("DEBUG: Error fetching data from Supabase: \(error)")
             errorMessage = error.localizedDescription

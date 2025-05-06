@@ -16,7 +16,7 @@ struct Cafe: Identifiable, Codable {
     let updatedAt: Date
 
     enum CodingKeys: String, CodingKey {
-        case id
+        case id = "cafe_id"
         case name
         case description
         case address
