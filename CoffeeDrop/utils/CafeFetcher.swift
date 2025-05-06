@@ -48,6 +48,7 @@ struct RegularOpeningHours : Decodable, Hashable {
     let openNow: Bool
     let periods: [Period]
     let weekdayDescriptions: [String]
+    let nextCloseTime : String?
 }
 
 struct PlaceLocation: Equatable, Decodable, Hashable {

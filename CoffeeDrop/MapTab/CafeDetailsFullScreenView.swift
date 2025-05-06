@@ -52,22 +52,7 @@ struct CafeDetailFullScreenView: View {
                     }
                 }
                 
-                HStack(spacing: 4) {
-                    // Iterate using enumerated() to get both index and element
-                    ForEach(Array(cafe.types.prefix(4).enumerated()), id: \.element) { index, type in
-                        Text(type)
-                            .font(.caption) // Changed font to caption for types
-                            .foregroundColor(.secondary) // Use secondary color
-
-                        // Add a dot separator if it's not the last item
-                        if index < cafe.types.count - 1 {
-                            Text("•") // The dot separator
-                                .font(.caption) // Match font size
-                                .foregroundColor(.secondary) // Match color
-                        }
-                    }
-                }
-                Text(cafe.priceLevel.dollarSigns)
+                Text("Price Level: " + cafe.priceLevel.dollarSigns)
                     .font(.body)
                     .foregroundColor(.primary)
                 // Address
@@ -79,7 +64,22 @@ struct CafeDetailFullScreenView: View {
                             .font(.body)
                     }
                 }
-
+                
+                if let websiteString = cafe.websiteUri, let url = URL(string: websiteString) {
+                   VStack(alignment: .leading) {
+                       Link(destination: url) {
+                           // The label of the link is the HStack you wanted
+                           HStack(spacing : 4){
+                               Image(systemName: "safari")
+                                   .resizable()
+                                   .frame(width: 15, height: 15)
+                               Text("Website") // Display "Website" as the text
+                           }
+                           .foregroundColor(.blue) // Style the link appearance
+                       }
+                       .font(.body) // Apply font to the link label
+                   }
+               }
                 // Opening Hours
 //                if let openingHours = cafe.regularOpeningHours {
 //                    VStack(alignment: .leading) {

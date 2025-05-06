@@ -154,20 +154,36 @@ struct CafeInfoCardView: View {
                                 .opacity(0.8)
                     }
                 }
-                HStack(spacing : 1){
-                    if cafe.regularOpeningHours?.openNow ?? false && ((cafe.regularOpeningHours?.openNow) != nil) {
-                        Circle()
-                            .fill(Color.green)
-                            .frame(width: 3, height: 3)
-                        Text("Open")
-                            .foregroundStyle(Color.green)
+                HStack(spacing : 4){ // Reduced spacing
+                // Check if openNow is true and nextCloseTime is available
+                if cafe.regularOpeningHours?.openNow == true,
+                   let nextCloseTime = cafe.regularOpeningHours?.nextCloseTime {
+                    Circle()
+                        .fill(Color.green)
+                        .frame(width: 6, height: 6) // Increased size slightly
+                    Text("Open")
+                        .foregroundStyle(Color.green)
+                        .font(.caption)
+                    if let formattedTime2 = formatISO8601TimeTo12HourClock(isoString: nextCloseTime) {
+                        Text("~ " + formattedTime2)
+                            .foregroundStyle(.white) // Use secondary color for time
                             .font(.caption)
-                        Text("~ Xpm")
-                            .foregroundStyle(Color.white)
-                            .font(.caption)
-                        Spacer()
                     }
+                } else {
+                    // If openNow is false
+                    Circle()
+                        .fill(Color.green)
+                        .frame(width: 6, height: 6)
+                    Text("Open 24/7")
+                        .foregroundStyle(Color.green)
+                        .font(.caption)
                 }
+                // Consider adding closing time if available even if openNow is nil or false
+                // This might require different API fields or parsing weekdayText
+
+                Spacer() // Pushes content to the left
+            }
+                
             }
         }
         .padding()

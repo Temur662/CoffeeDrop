@@ -225,20 +225,33 @@ struct CafeNearMeCard : View {
                         }
                         .padding(.leading)
 
-                        HStack(spacing : 1){
-                            if place.regularOpeningHours?.openNow ?? false && ((place.regularOpeningHours?.openNow) != nil) {
-                                Circle()
-                                    .fill(Color.green)
-                                    .frame(width: 3, height: 3)
-                                Text("Open")
-                                    .foregroundStyle(Color.green)
+                        HStack(spacing : 4){ // Reduced spacing
+                        // Check if openNow is true and nextCloseTime is available
+                        if place.regularOpeningHours?.openNow == true,
+                           let nextCloseTime = place.regularOpeningHours?.nextCloseTime {
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 6, height: 6) // Increased size slightly
+                            Text("Open")
+                                .foregroundStyle(Color.green)
+                                .font(.caption)
+                            // Corrected: Unwrapped nextCloseTime before concatenation
+                            if let formattedTime2 = formatISO8601TimeTo12HourClock(isoString: nextCloseTime) {
+                                Text("~ " + formattedTime2)
+                                    .foregroundStyle(.white) // Use secondary color for time
                                     .font(.caption)
-                                Text("~ Xpm")
-                                    .foregroundStyle(Color.white)
-                                    .font(.caption)
-                                Spacer()
                             }
+                        } else {
+                            // If openNow is false
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 6, height: 6)
+                            Text("Open 24/7")
+                                .foregroundStyle(Color.green)
+                                .font(.caption)
                         }
+                        Spacer() // Pushes content to the left
+                    }
                         .padding(.leading)
                         HStack{
                             Text("\(place.displayName.text)")
@@ -325,4 +338,42 @@ struct Star: Shape {
         let transform = CGAffineTransform(translationX: center.x, y: center.y + unusedSpace)
         return path.applying(transform)
     }
+}
+
+func formatISO8601TimeTo12HourClock(isoString: String) -> String? {
+    // 1. Create a DateFormatter to parse the input ISO 8601 string.
+    // Using "en_US_POSIX" locale is recommended for parsing fixed-format date strings.
+    let inputFormatter = DateFormatter()
+    inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+    // The format string matches "YYYY-MM-DDTHH:mm:ssZ"
+    inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+    // Set the input time zone to UTC because 'Z' indicates Zulu time (UTC)
+    inputFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+
+    // 2. Attempt to parse the input string into a Date object.
+    guard let date = inputFormatter.date(from: isoString) else {
+        // Return nil if the string cannot be parsed
+        print("Error: Could not parse date string '\(isoString)'")
+        return nil
+    }
+
+    // 3. Create a second DateFormatter to format the Date object into the desired time string.
+    let outputFormatter = DateFormatter()
+    // Set the locale to the user's current locale for appropriate AM/PM format
+    outputFormatter.locale = Locale.current
+    // Set the format string for 12-hour time with AM/PM (e.g., "3 PM", "6 AM")
+    outputFormatter.dateFormat = "h a"
+
+    // *** Set the time zone for the OUTPUT formatter to Eastern Time ***
+    // "America/New_York" is a standard identifier that handles EST/EDT automatically
+    guard let easternTimeZone = TimeZone(identifier: "America/New_York") else {
+        print("Error: Could not create TimeZone for America/New_York")
+        return nil // Should not happen for a standard identifier
+    }
+    outputFormatter.timeZone = easternTimeZone
+
+    // 4. Format the Date object into the output string in the Eastern Time Zone.
+    let timeString = outputFormatter.string(from: date)
+
+    return timeString
 }
