@@ -13,9 +13,9 @@ struct ContentView: View {
     @EnvironmentObject var userProfile : UserProfile
     @State var isAuthenticated = false
       var body: some View {
-        UserRootView()
+       //UserRootView()
        
-     /* Group {
+      Group {
           if isAuthenticated {
             UserRootView()
           } else {
@@ -32,7 +32,6 @@ struct ContentView: View {
             }
           }
         }
-      */
       }
 }
 
@@ -40,14 +39,3 @@ struct ContentView: View {
     ContentView()
         .environmentObject(UserProfile())
 }
-
-/*TabView{
-    Home()
-        .tabItem{
-            Label("Home", systemImage : "house")
-        }
-    MapTab()
-        .tabItem{
-            Label("Map", systemImage: "map")
-        }
-}*/
